@@ -50,7 +50,14 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
-    pass  
+    """
+
+    :param df: DataFrame with messages and categories
+    :param database_filename: name for database
+    :return: -
+    """
+    engine = create_engine('sqlite:///' + database_filename)
+    df.to_sql('disaster-messages', engine, index=False)
 
 
 def main():
