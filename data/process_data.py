@@ -1,13 +1,34 @@
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    :param messages_filepath: path to messages csv
+    :param categories_filepath: path to categories csv
+    :return: DataFrame containing messages and categories data
+    """
+
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+
+    cleaned_categories = clean_categories_data(categories)
+
+    df = pd.merge(messages, categories)
+
+    return df
+
+
+def clean_categories_data(cat_df):
+    cat_df = cat_df['categories'].str.split(";", expand=True)
+    
     pass
 
 
 def clean_data(df):
-    pass
 
+    pass
 
 def save_data(df, database_filename):
     pass  
