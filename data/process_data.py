@@ -1,6 +1,6 @@
-import sys
 import pandas as pd
 from sqlalchemy import create_engine
+import sys
 
 
 def load_data(messages_filepath, categories_filepath):
@@ -13,22 +13,41 @@ def load_data(messages_filepath, categories_filepath):
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
 
-    cleaned_categories = clean_categories_data(categories)
+    expanded_categories = expand_categories_data(categories)
 
-    df = pd.merge(messages, categories)
+    # Join messages and expanded_categories dataframes
+    df = pd.concat([messages, expanded_categories], axis=1)
 
     return df
 
 
-def clean_categories_data(cat_df):
+def expand_categories_data(cat_df):
+    """
+    :param cat_df: categories DataFrame
+    :return: DataFrame which has been cleaned and expanded with one-hot encoded variables
+    """
     cat_df = cat_df['categories'].str.split(";", expand=True)
-    
-    pass
+
+    # Find column names for expanded df
+    row = cat_df.iloc[0, :]
+    category_col_names = list(row.apply(lambda x: x.split("-")[0]))
+    cat_df.columns = category_col_names
+
+    # Convert category values to Ones or Zeroes
+    for col in cat_df:
+        cat_df[col] = cat_df[col].apply(lambda x: x[-1]).astype(int)
+
+    return cat_df
 
 
 def clean_data(df):
+    """
+    :param df: DataFrame of messages and categories
+    :return: cleaned DataFrame of messages and categories, with duplicates removed
+    """
 
-    pass
+    return df.drop_duplicates(subset='id')
+
 
 def save_data(df, database_filename):
     pass  
@@ -52,11 +71,11 @@ def main():
         print('Cleaned data saved to database!')
     
     else:
-        print('Please provide the filepaths of the messages and categories '\
-              'datasets as the first and second argument respectively, as '\
-              'well as the filepath of the database to save the cleaned data '\
-              'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
+        print('Please provide the filepaths of the messages and categories '
+              'datasets as the first and second argument respectively, as '
+              'well as the filepath of the database to save the cleaned data '
+              'to as the third argument. \n\nExample: python process_data.py '
+              'disaster_messages.csv disaster_categories.csv '
               'DisasterResponse.db')
 
 
